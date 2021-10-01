@@ -9,7 +9,7 @@ int main(int argc, int *argv)
 
     
 
-    serialConfigInit();
+    serialConfigInit(); //
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
