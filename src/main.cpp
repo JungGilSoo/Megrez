@@ -1,6 +1,7 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QTime>
 
 void serialConfigInit(); // What is this?
 
@@ -33,7 +34,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 int main(int argc, int *argv)
 {
 
-    
+    printf("[Start]\n");
     qInstallMessageHandler(myMessageOutpur); // Message Handler Registration
     serialConfigInit(); //
     QApplication a(argc, argv);
