@@ -1,7 +1,7 @@
 
 #include <QApplication>
 
-void serialConfigInit();
+void serialConfigInit(); // What is this?
 
 int main(int argc, int *argv)
 {
