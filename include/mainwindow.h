@@ -19,7 +19,9 @@ public:
     QSetting* m_configIni;
 
     IrisDevice* m_irisDevice = 0;
-    int mWindowRect;
+    QString mFaceDetectMode;
+    int mWindowRec;
+    int mMoveThreashold;
     int mDisplayMode;
     int mCamWidth, mCamHeight;
 

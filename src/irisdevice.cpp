@@ -175,3 +175,8 @@ int IrisDevice::getCamID()
 {
     return m_camID;
 }
+
+int IrisDevice::getWebCamID()
+{
+    return m_webcamID;
+}

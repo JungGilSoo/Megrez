@@ -80,13 +80,16 @@ void MainWindow::configInit()
     QString filename = appPath() +"/config.ini";
     m_configIni = new QSettings(filename, QSettings::IniFormat);
 
-
+    mMoveThreashold = m_configIni->value("FACEDETECT/move").toInt();
+    mFaceDetectMode = m_configIni->value("FACEDETECT/mode").toString();
     mDisplayMode = m_configIni->value("LAYOUT/mode").toInt();
     mCamWidth = m_configIni->value("WEBCAM/width").toInt();
     mCamHeigh = m_configIni->value("WEBCAM/height").toInt();
     mCamRunWidth = m_configIni->value("WEBCAM/runWidth").toInt();
     mCamRunHeight = m_configIni->value("WEBCAM/runHeight").toInt();
 
+    qDebug("[Mainwin] FaceDetectMode %s",mFaceDetectmod.toStdString().c_str());
+    qDebug("[Mainwin] MoveThreashold %d",mMoveThreashold);
     qDebug("[Mainwin] USBCAM width %d (%d)",mCamWidth,mCamRunWidth);
     qDebug("[Mainwin] USBCAM height %d (%d)",mCamHeight,mCamRunWidth);
 
@@ -190,6 +193,7 @@ void MainWindow::mStartReady()
     if(m_readyThread == 0)
     {
         m_readyThread = new ReadyThread();
+        connect(m_readThrea,SIGNAL(readyDone()),this,SLOT(slot_readyDone()));
         
     }
 }

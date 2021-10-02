@@ -16,6 +16,7 @@ public:
 
     int getCamID();
     int getCamID1();
+    int getWebCamID();
     int mUsbType;
 
 private:
