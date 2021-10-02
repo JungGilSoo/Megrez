@@ -47,6 +47,9 @@ void MainWindow::coonfigInit()
     m_configIni = new QSettings(filename, QSettings::IniFormat);
 
 
+    mDisplayMode = m_configIni->value("LAYOUT/mode").toInt();
+
+
     // Using screenGeometry, the start coordinates of the Monitor obtains.
     QRect rec = QApplication::desktop()->screenGeometry();
     int height = rect.height();
@@ -119,6 +122,15 @@ void MainWindow::coonfigInit()
 
     cv::VideoCapture icon;
     cv::Mat pic;
-    QPixmap s_ing;
+    QPixmap s_img;
     icon.open("./resource/j2c.png");
+    icon >> pic; // I KNOW THIS WOULD WORK.
+    cv::cvtColor(pic,pic,VC_BGR2RGB);
+    cv::resize(pic,pic,cv::Size(120,45),0,0,0);
+    s_img = QPixmap::formImage(QImage(pic.data, pic.cols, pic.rows, pic.step, QImage::Format_RGB888));
+    ui->icon->setPixmap(s_img);
+
+    QTimer::singleShot(1, this, SLOT(delayConfig()));
+    QCursor cursor;
+    cursor.setPos(720,1280);
 }
