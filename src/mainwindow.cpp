@@ -1,4 +1,7 @@
 
+
+#include "irisdevice.h"
+
 #include <QDir>
 #include <Qdebug>
 
@@ -39,7 +42,38 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 
-void MainWindow::coonfigInit()
+MainWindow::~MainWindow()
+{
+
+}
+
+void MainWindow::initIrisDevice()
+{
+    m_irisDevice = new IrisDevice(this);
+
+    connet(m_irisDevice,SIGNAL(connected(QString)),this,SLOT(connectedIrisDevice(QString)));
+
+    if(!m_irisDevice->initialize()) {
+        qDebug("[MainWin] Device Not Found");
+        return;
+    }
+    int alkaid = m_irisDevice->getCamID();
+    int alkaid1 = m_irisDevice->getCamID1();
+    mUsbtype = m_irisDevice->mUsbType;
+
+    qDebug("ALKAID0 %d",alkaid);
+    qDebug("ALKAID1 %d",alkaid1);
+    qDebug("USB Type %d",mUsbType);
+}
+
+
+void MainWindow::connectedIrisDevice(QSring text)
+{
+    qDebug("[Mainwin] Connected %s", text.toStdString().c_str());
+}
+
+
+void MainWindow::configInit()
 {
     qDebug("Config Start");
 
@@ -48,6 +82,13 @@ void MainWindow::coonfigInit()
 
 
     mDisplayMode = m_configIni->value("LAYOUT/mode").toInt();
+    mCamWidth = m_configIni->value("WEBCAM/width").toInt();
+    mCamHeigh = m_configIni->value("WEBCAM/height").toInt();
+    mCamRunWidth = m_configIni->value("WEBCAM/runWidth").toInt();
+    mCamRunHeight = m_configIni->value("WEBCAM/runHeight").toInt();
+
+    qDebug("[Mainwin] USBCAM width %d (%d)",mCamWidth,mCamRunWidth);
+    qDebug("[Mainwin] USBCAM height %d (%d)",mCamHeight,mCamRunWidth);
 
 
     // Using screenGeometry, the start coordinates of the Monitor obtains.
@@ -133,4 +174,22 @@ void MainWindow::coonfigInit()
     QTimer::singleShot(1, this, SLOT(delayConfig()));
     QCursor cursor;
     cursor.setPos(720,1280);
+}
+
+
+void Mainwindow::delayConfig()
+{
+    initIrisDevice();
+//    welcomeStart();
+    emit startReady();
+}
+
+void MainWindow::mStartReady()
+{
+    qDebug("[Mainwin] Ready Start called");
+    if(m_readyThread == 0)
+    {
+        m_readyThread = new ReadyThread();
+        
+    }
 }
