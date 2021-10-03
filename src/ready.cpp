@@ -77,8 +77,35 @@ void ReadyThread::irisDetecRun()
     for(;;) {
         int ret = readyDisplay();
 //        emit theMainWindow->msgBox("WebCam Read Error");
+        if ( ret == 0 ) {
+//        emit theMainwindow->msgBox("WebCam read Error");
+            qDebug("ready display done");
+            QThread::mslee(100);
+            emit readyDone();
+        }
 
+       if ( m_state == mStart ) {
+          backGround();
+           m_state = mIdle;
+           QThread::msleep(100);
+        }
+       else if ( m_state == mIdentify ) {
+            QThread::msleep(40);
+            qDebug("[Ready] mIdentify state");
+        }
+        else if (m_state == mFace) {
+            QThread::msleep(20);
+        }
+        else{
+            QThread::msleep(350);
+        }
+
+        if ( m_stop) break;
     }
+    QPixmap s_img;
+    emit drawImage(0,s_img);
+    if (webCam.isOpend()) webCam.release();
+    qDebug("[Ready] release");
 }
 
 int check_loop = 0;
@@ -246,8 +273,56 @@ int ReadyThread::readyDisplay()
         s_img = QPixmap::fromImage(QImage(procImg.data,procImg.cols,procimg.rows, procImg.step,QImage::Format_RGB888));
 
         QPainter painter(&s_img);
+        painier.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.drawImage(0,mCamOffsetY,faceStart);
+
+        painter.end();
     }
+    else {
+        return 1;
+
+        readycap >> org;
+        if (irg.empy()) {
+            qDebug("ready mov empty");
+            readyCap.release();
+            readycap.open("resource/ready.mov");
+            readycap >> org;
+        }
+        if ( theMainwindow->mWindowRec) {
+            cv::resize(org,org,cv::Size(1024,600),0,0,0);
+            frame = org(cv::Rect(0,0,1024,600));
+        }
+        else
+        {
+            cv::rotate(org,org,cv::ROTATE_90_CLOCKWISE);
+	        /*
+            cv::resize(org,org,cv::Size(720,1280),0, 0, 0);
+            frame = org(cv::Rect(0,(1280-1000)/2,720,1000));
+	        */
+            cv::resize(org,frame,cv::Size(720,1280),0, 0, 0);      
+        }
+        cv::cvtColor(frame, frame,CV_BGR2RGB);
+//        frame = frame(cv::Rect(0,0,600,600));
+//        cv::resize(frame,frame,cv::Size(720,720),0,0,0);
+        s_img = QPixmap::fromImage(QImage(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888));
+        current = QDateTime::currentDateTime();
+        if ( current.time().second() %2 == 0 ) {
+	    QPainter painter(&s_img);
+            painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+            if ( theMainWindow->mWindowRec ) {
+                painter.drawImage(110,60,imgTouchScreen);
+	    }
+	    else {
+                painter.drawImage(0,(1000-720)/2,imgTouchScreen);
+	    }
+            painter.end();
+        }
+    }
+
+    emit drawImage(0,s_img);
+    return 1;
 }
+
 
 int ReadyThead::checkFaceDnn(cv::Mat img, int opt, int *f_c,int *f_y,int *f_w, int *f_h)
 {
