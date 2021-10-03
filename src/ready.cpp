@@ -228,7 +228,24 @@ int ReadyThread::readyDisplay()
         }
         else if (faceSize < (theMainWindow->mFaceDetecSize + 30)) {
             painter.drawImage(0,mCamOffsetY,faceBlue);
+//            theMainWindow->m_shutterPlayer->playIndex(5);
         }
+        else
+            painter.drawImge(0,mCamOffsetY,faceGreen);
+
+        painter.end();    
+    }
+    else if ( m_state != mIdle ) {
+        cv::cvtColor(camImg, camImg,CV_BFR2RGB);
+
+        if ( theMainWindow->mWindowRec == 0) {
+            cv::resize(camImg,camImg, cv::Size(1710,1280), 0, 0, 0);
+            camImg = camImg(cv::Rect((1710-720)/2-mCamOffsetX,0,720,1280));
+        }
+        cv::flip(camImg,procImg,1);
+        s_img = QPixmap::fromImage(QImage(procImg.data,procImg.cols,procimg.rows, procImg.step,QImage::Format_RGB888));
+
+        QPainter painter(&s_img);
     }
 }
 
