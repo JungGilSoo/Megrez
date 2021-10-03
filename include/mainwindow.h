@@ -1,5 +1,7 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-
+#include "shutterplayer.h"
 #include <QMainWindow>
 #include <QSettings>
 
@@ -16,6 +18,8 @@ public:
 
     QString appPath() { return m_appPath; }
 
+    ShutterPlayer* m_shutterPlayer;
+
     QSetting* m_configIni;
 
     IrisDevice* m_irisDevice = 0;
@@ -24,6 +28,9 @@ public:
     int mMoveThreashold;
     int mDisplayMode;
     int mCamWidth, mCamHeight;
+    int mCamRunWidth, mCamRunHeight;
+    int mCamOffsetX, mCamOffsetY;
+    int mUsbType;
 
 private:
 
@@ -43,3 +50,5 @@ private slots:
 }
 
 extern MainWindow* theMainWindow;
+
+#endif // MAINWINDOW_H

@@ -80,6 +80,7 @@ void MainWindow::configInit()
     QString filename = appPath() +"/config.ini";
     m_configIni = new QSettings(filename, QSettings::IniFormat);
 
+    mFaceDetectSize = m_configIni->value("FACEDETEC/sizw").toInt();
     mMoveThreashold = m_configIni->value("FACEDETECT/move").toInt();
     mFaceDetectMode = m_configIni->value("FACEDETECT/mode").toString();
     mDisplayMode = m_configIni->value("LAYOUT/mode").toInt();
@@ -87,11 +88,15 @@ void MainWindow::configInit()
     mCamHeigh = m_configIni->value("WEBCAM/height").toInt();
     mCamRunWidth = m_configIni->value("WEBCAM/runWidth").toInt();
     mCamRunHeight = m_configIni->value("WEBCAM/runHeight").toInt();
+    mCamOffsetX = m_configIni->value("WEBCAM/offsetX").toInt();
+    mCamOffsetY = m_configIni->value("WEBCAM/offsetY").toInt();
 
-    qDebug("[Mainwin] FaceDetectMode %s",mFaceDetectmod.toStdString().c_str());
+    qDebug("[Mainwin] FaceDetecSize %d",mFaceDetectSize);
+    qDebug("[Mainwin] FaceDetectMode %s",mFaceDetectmode.toStdString().c_str());
     qDebug("[Mainwin] MoveThreashold %d",mMoveThreashold);
     qDebug("[Mainwin] USBCAM width %d (%d)",mCamWidth,mCamRunWidth);
     qDebug("[Mainwin] USBCAM height %d (%d)",mCamHeight,mCamRunWidth);
+    qDebug("[Mainwin] USBCAM offset %d,%d",mCamOffsetX,mCamOffsetY);
 
 
     // Using screenGeometry, the start coordinates of the Monitor obtains.
