@@ -72,6 +72,35 @@ void MainWindow::connectedIrisDevice(QSring text)
     qDebug("[Mainwin] Connected %s", text.toStdString().c_str());
 }
 
+void MainWindow::showIdentifySuccess(std::string id,std::string name)
+{
+    Qdebug("[Mainwin] Identify Success");
+    m_state = mMatch;
+    emit stopReady();
+
+    std::string data;
+    std::vector<std::string> id_vector = split(id, '-');
+    data = id.vector[0];
+    m_identityId = data;
+
+    std::vetor<std::string> name_vector = split(name, '_');
+    data = name_vector[0];
+    identityName = data; 
+
+    identitycap.open("./resourece/result.mov");
+    emit startIdentityResult(true);
+}
+
+void MainWindow::showIdentityFail()
+{
+    qDebug("[Mainwin] identity Fail");
+    m_state = mDeny;
+    emit stopReady();
+
+    identitycap.open("./resource/result.mov");
+    emit startIdentityResult(false);
+}
+
 
 void MainWindow::configInit()
 {

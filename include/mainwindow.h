@@ -33,6 +33,19 @@ public:
     int mUsbType;
 
 private:
+    int m_state;
+    enum State
+    {
+        mIdle = 0,
+        mIdentity,
+        mWelcome,
+        mReady,
+        mEnroll,
+        mDeny,
+        mMatch,
+    };
+
+    cv::VideoCapture identitycap;
 
     QString m_appPath;
 

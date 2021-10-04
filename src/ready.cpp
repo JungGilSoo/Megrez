@@ -72,6 +72,41 @@ void ReadyThread::run()
     else            irisDetecRun();
 }
 
+void ReadyThread::faceDetectRun()
+{
+    qDebug("faceDetectRun");
+    for(;;) {
+        if(m_state == mStart) {
+            backGroud();
+            m_state = mIdle;
+            QThread::msleep(50);
+//            continue;
+        }
+
+        if(m_state == mface || m_state == mFaceIdentify || m_state == mIdentify) {
+            QThread::msleep(20);
+        }
+        else {
+            QThread::msleep(350);
+        }
+
+        if(m_stop) break;
+
+        int ret = faceDetec();
+        if(ret == 0) {
+            qDebug("ready display done");
+            QThread::msleep(100);
+            emit readyDone();
+            break;
+        }
+    }
+
+    QPixmap s_img;
+    emit drawImage(0,s_img);
+    if(webCam.isOpend()) webCam.release();
+    qDebug("[Ready] release");
+}
+
 void ReadyThread::irisDetecRun()
 {
     for(;;) {
@@ -217,6 +252,83 @@ int ReadyThread::faceCheck(cv::Mat camImg)
     return faceSize;
 }
 
+int faceRetryCnt = 0;
+int ReadyThread::faceDetec()
+{
+    cv::Mat org,camImg,procImg;
+    QPixmap s_img;
+    /*
+    if (m_state == mStart) {
+        return 1;
+    }
+    */
+
+    webCam.read(camImg);
+    if (camImg.empty()) {
+        qDebug("WebCam Empty");
+        return 0;
+    }
+
+    cv::flip(camImg,camImg,0);
+    camImg.copyTo(org);
+
+    if (m_state <= mIdle){
+        faceRetryCnt = 0;
+        ret = moveCheck(camImg);
+        return 1; // move : m_state == mFace
+    }
+
+    if(m_state == mFace) {
+        ret = faceCheck(camImg)
+    }
+    else
+        ret = checkFaceDnn(camImg,0,&x,&y,&w,&h);
+
+    cv::cvtColor(camImg, camImg, CV_BGR2RGB);
+
+    if ( theMainWindow->mWindowRec == 0 ) {
+        cv::resize(camImg, camImg,cv::Size(1710,1280),0, 0, 0);
+        caImg = camImg(cv::Rect((1710-720/2-mCamOffsetX),0,720,1280));
+    }
+
+    cv::flip(camImg,procimg,1);
+    s_img = QPixmap::fromImage(QImage(procImg.dat, procImg.cols,procImg.rows,procImg.step,QImage::Format_RGB888));
+
+    QPainter painier(&s_img);
+    painier.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    painter.end();
+    emit drawImage(0,s_img);
+
+    qDebug("Face x,y %d %d, w,h %d %d",x,y,w,h);
+    if (ret > theMainWindow->mFaceDetectSize) {
+//        cv::cvtColor(org, org, CV_BGR2RGB);
+        qDebug("ProcImg %dx%d",org.clos,org.rows);
+//        cv::resize(procImg,procImg,cv::Size(procImg.cols/3,procImg.rows/3),0, 0, 0);
+        ret = identifyFace(org,x,y,w,h);
+        faceIdentifycnt = 0;
+        if ( ret 1= 1) {
+            faceRetryCnt++;
+            if(faceRetryCnt > 5) {
+                m_state = mStart;
+                m_stop = true;
+                theMainWindow->showIdentifyFail();
+            }
+        }
+    }
+    else {
+        if (faceIdentifycnt ++ > 50) {
+            m_state = mIdle;
+            faceFlag = false;
+            moveFlag = false;
+            faceIdentifycnt = 0;
+            cnt_t = 0;
+            noface_t = 0;
+            backGroud()
+        }
+    }
+    return 1;
+}
+
 
 int ReadyThread::readyDisplay()
 {
@@ -358,4 +470,34 @@ int ReadyThead::checkFaceDnn(cv::Mat img, int opt, int *f_c,int *f_y,int *f_w, i
     }
     //qDebug("Face Size %d", 0);
     return 0;
+}
+
+
+extern int grpcIdentify(int type,cv::Mat img,std::string *id,std::string *name);
+
+int ReadyThread::identifyFace(cv::Mat ing,int x,int y,int w,int h)
+{
+    int ret;
+    std::string id, namw;
+
+    ret = grpcIdentify(0,img,&id,&name);
+    qDebug("grpc ret %d",ret);
+    if(ret == 1) {
+        theMainWindow->showIdentifySuccess(id.c_str(),name.c_str());
+        qDebug("id %s name %s",id.c_str(),name.c_str());
+        m_state = mStart;
+        m_stop = true;
+        /*
+        faceFlay = false;
+        moveFlay = false;
+        faceIdentifycnt = 0;
+        cnt_t = 0;
+        noface_t = 0;
+        backGround();
+        */
+    }
+    else {
+        qDebug("Identify Fail %d",ret);
+    }
+    return ret;
 }

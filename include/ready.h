@@ -3,6 +3,8 @@
 
 #include "facedetector.h"
 
+#include <QThread>
+
 class ReadyThread : public QThread
 {
     Q_OBJECT
@@ -26,7 +28,10 @@ private:
 
     FaceDetector* m_face_detector = 0;
 
+    int m_stop;
     int m_state;
+    int readyDisplay();
+    int faceDetec();
 
     bool moveFlag=false;
     bool faceFlag=false;
@@ -39,6 +44,7 @@ private:
     int mFaceMode;
     int moveCheck(cv::Mat img);
     void irisDetecRun();
+    void faceDetectRun();
 
 signals:
     void readyDone();
